@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1400" height="900" viewBox="0 0 1400 900" role="img" aria-labelledby="title desc">
+  <title id="title">Multimodal RAG System Design</title>
+  <desc id="desc">System architecture for a LangChain multimodal RAG notebook that partitions a PDF, summarizes text tables and images, indexes summaries in Chroma, stores original elements, retrieves relevant context, and answers questions with a multimodal LLM while tracing with LangSmith.</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#334155"/>
+    </marker>
+    <filter id="shadow" x="-15%" y="-15%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="8" flood-color="#0f172a" flood-opacity="0.14"/>
+    </filter>
+    <style>
+      .bg { fill: #f8fafc; }
+      .title { font: 700 34px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .subtitle { font: 400 17px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475569; }
+      .section { font: 700 18px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .label { font: 700 16px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #0f172a; }
+      .small { font: 400 13px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #475569; }
+      .tiny { font: 400 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #64748b; }
+      .box { fill: #ffffff; stroke: #cbd5e1; stroke-width: 1.4; filter: url(#shadow); }
+      .blue { fill: #dbeafe; stroke: #60a5fa; }
+      .green { fill: #dcfce7; stroke: #4ade80; }
+      .amber { fill: #fef3c7; stroke: #f59e0b; }
+      .purple { fill: #f3e8ff; stroke: #c084fc; }
+      .rose { fill: #ffe4e6; stroke: #fb7185; }
+      .slate { fill: #f1f5f9; stroke: #94a3b8; }
+      .line { stroke: #334155; stroke-width: 2.2; fill: none; marker-end: url(#arrow); }
+      .dash { stroke: #64748b; stroke-width: 2; fill: none; marker-end: url(#arrow); stroke-dasharray: 8 7; }
+      .pill { fill: #0f172a; }
+      .pillText { font: 700 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: #ffffff; letter-spacing: .04em; }
+    </style>
+  </defs>
+
+  <rect class="bg" width="1400" height="900"/>
+  <text class="title" x="60" y="70">Multimodal RAG System Design</text>
+  <text class="subtitle" x="60" y="100">PDF parsing, multimodal summarization, multi-vector retrieval, answer generation, and observability</text>
+
+  <rect class="box blue" x="60" y="155" width="220" height="115" rx="20"/>
+  <text class="label" x="90" y="195">Input PDF</text>
+  <text class="small" x="90" y="222">attention.pdf</text>
+  <text class="tiny" x="90" y="246">Research paper with text,</text>
+  <text class="tiny" x="90" y="263">tables, and figures</text>
+
+  <rect class="box green" x="350" y="135" width="280" height="155" rx="20"/>
+  <text class="label" x="382" y="177">Document Partitioning</text>
+  <text class="small" x="382" y="206">unstructured.partition_pdf</text>
+  <text class="tiny" x="382" y="232">strategy="hi_res"</text>
+  <text class="tiny" x="382" y="251">Poppler + Tesseract OCR</text>
+  <text class="tiny" x="382" y="270">Extracts text, tables, images</text>
+
+  <rect class="box slate" x="700" y="120" width="250" height="90" rx="18"/>
+  <text class="label" x="732" y="158">Text Chunks</text>
+  <text class="tiny" x="732" y="184">CompositeElement objects</text>
+
+  <rect class="box slate" x="700" y="245" width="250" height="90" rx="18"/>
+  <text class="label" x="732" y="283">Tables</text>
+  <text class="tiny" x="732" y="309">HTML/text table payloads</text>
+
+  <rect class="box slate" x="700" y="370" width="250" height="90" rx="18"/>
+  <text class="label" x="732" y="408">Images</text>
+  <text class="tiny" x="732" y="434">Base64 extracted figures</text>
+
+  <rect class="box amber" x="1020" y="135" width="300" height="165" rx="20"/>
+  <text class="label" x="1052" y="175">Text &amp; Table Summaries</text>
+  <text class="small" x="1052" y="204">ChatGroq</text>
+  <text class="tiny" x="1052" y="230">llama-3.1-8b-instant</text>
+  <text class="tiny" x="1052" y="249">Sequential retry/throttle for</text>
+  <text class="tiny" x="1052" y="268">Groq TPM limits</text>
+
+  <rect class="box rose" x="1020" y="355" width="300" height="145" rx="20"/>
+  <text class="label" x="1052" y="395">Image Summaries</text>
+  <text class="small" x="1052" y="424">ChatOpenAI</text>
+  <text class="tiny" x="1052" y="450">gpt-4o-mini vision prompt</text>
+  <text class="tiny" x="1052" y="469">Describes figures for retrieval</text>
+
+  <rect class="box purple" x="370" y="555" width="290" height="155" rx="20"/>
+  <text class="label" x="402" y="596">Vector Index</text>
+  <text class="small" x="402" y="624">Chroma + OpenAIEmbeddings</text>
+  <text class="tiny" x="402" y="650">Stores concise summaries as</text>
+  <text class="tiny" x="402" y="669">embedding-searchable child docs</text>
+
+  <rect class="box purple" x="735" y="555" width="290" height="155" rx="20"/>
+  <text class="label" x="767" y="596">Original Document Store</text>
+  <text class="small" x="767" y="624">InMemoryStore</text>
+  <text class="tiny" x="767" y="650">Keeps original text, table, and</text>
+  <text class="tiny" x="767" y="669">image payloads by doc_id</text>
+
+  <rect class="box green" x="1080" y="575" width="250" height="115" rx="20"/>
+  <text class="label" x="1110" y="615">MultiVectorRetriever</text>
+  <text class="tiny" x="1110" y="642">Search summaries in Chroma,</text>
+  <text class="tiny" x="1110" y="661">return original payloads</text>
+
+  <rect class="box blue" x="60" y="760" width="240" height="95" rx="20"/>
+  <text class="label" x="90" y="800">User Question</text>
+  <text class="tiny" x="90" y="826">Example: paper authors,</text>
+  <text class="tiny" x="90" y="845">architecture details, figures</text>
+
+  <rect class="box amber" x="385" y="748" width="300" height="120" rx="20"/>
+  <text class="label" x="417" y="788">RAG Prompt Builder</text>
+  <text class="tiny" x="417" y="816">parse_docs separates text and</text>
+  <text class="tiny" x="417" y="835">base64 images into one prompt</text>
+
+  <rect class="box rose" x="770" y="748" width="260" height="120" rx="20"/>
+  <text class="label" x="802" y="788">Answer Model</text>
+  <text class="small" x="802" y="816">ChatOpenAI</text>
+  <text class="tiny" x="802" y="842">Multimodal response grounded</text>
+  <text class="tiny" x="802" y="861">in retrieved context</text>
+
+  <rect class="box slate" x="1100" y="748" width="230" height="120" rx="20"/>
+  <text class="label" x="1132" y="788">LangSmith</text>
+  <text class="tiny" x="1132" y="816">Traces chains, model calls,</text>
+  <text class="tiny" x="1132" y="835">latency, and run metadata</text>
+
+  <path class="line" d="M 280 212 L 350 212"/>
+  <path class="line" d="M 630 192 C 660 170, 670 165, 700 165"/>
+  <path class="line" d="M 630 212 C 660 240, 670 290, 700 290"/>
+  <path class="line" d="M 630 232 C 660 315, 670 415, 700 415"/>
+  <path class="line" d="M 950 165 L 1020 185"/>
+  <path class="line" d="M 950 290 L 1020 235"/>
+  <path class="line" d="M 950 415 L 1020 425"/>
+  <path class="line" d="M 1145 300 C 1120 415, 885 530, 660 610"/>
+  <path class="line" d="M 1170 500 C 1115 555, 990 560, 1025 625"/>
+  <path class="line" d="M 660 632 L 735 632"/>
+  <path class="line" d="M 1025 632 L 1080 632"/>
+  <path class="line" d="M 300 807 L 385 807"/>
+  <path class="line" d="M 1205 690 C 1180 725, 1110 758, 1030 805"/>
+  <path class="line" d="M 685 807 L 770 807"/>
+  <path class="dash" d="M 1030 807 L 1100 807"/>
+
+  <rect class="pill" x="70" y="122" width="82" height="28" rx="14"/>
+  <text class="pillText" x="90" y="141">INGEST</text>
+  <rect class="pill" x="1018" y="102" width="112" height="28" rx="14"/>
+  <text class="pillText" x="1038" y="121">SUMMARIZE</text>
+  <rect class="pill" x="370" y="522" width="96" height="28" rx="14"/>
+  <text class="pillText" x="390" y="541">INDEX</text>
+  <rect class="pill" x="60" y="727" width="106" height="28" rx="14"/>
+  <text class="pillText" x="80" y="746">QUERY</text>
+</svg>
